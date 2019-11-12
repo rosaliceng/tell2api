@@ -25,9 +25,15 @@ module Api
         @user = User.new(user_params)
 
         if @user.save
-          render json: @user, status: :created
+          puts "=========success"
+          response.status = 201
+          puts @user
+          render json: {result: @user, error: nil}
         else
-          render json: @user.errors, status: :unprocessable_entity
+          response.status = 409
+          puts "=========error"
+          puts @user.errors.full_messages
+          render json: {result: nil, error: @user.errors.full_messages}
         end
       end
 
