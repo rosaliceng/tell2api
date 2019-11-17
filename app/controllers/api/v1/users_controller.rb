@@ -8,7 +8,13 @@ module Api
       def index
         @users = User.all
 
-        render json: @users
+        render json: {result: @users, error: nil}
+      end
+
+      def searchUserByEmail
+        user = User.where(" email LIKE ?","%#{params[:search]}%").select([:id,:name,:email,:country])
+        puts ">>>>>>>>>>>=======#{user}"
+        render json:{results: user}
       end
 
       def current
@@ -17,7 +23,7 @@ module Api
 
       # GET /users/1
       def show
-        render json: @user
+        render json: {result: @user.as_json(:except=>[:password_digest]), error: @user.errors.full_messages}
       end
 
       # POST /users
@@ -28,7 +34,7 @@ module Api
           puts "=========success"
           response.status = 201
           puts @user
-          render json: {result: @user, error: nil}
+          render json: {result: @user.as_json(except: [:password_digest]), error: nil}
         else
           response.status = 409
           puts "=========error"
@@ -40,6 +46,7 @@ module Api
       # PATCH/PUT /users/1
       def update
         if @user.update(user_params)
+          response.status = 200
           render json: @user
         else
           render json: @user.errors, status: :unprocessable_entity

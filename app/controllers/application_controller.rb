@@ -15,4 +15,5 @@ class ApplicationController < ActionController::API
       render json: { result: "Token invalid." }, status: :unauthorized
     end
   end
+  
 end
