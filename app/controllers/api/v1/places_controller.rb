@@ -5,28 +5,18 @@ module Api
       before_action :set_places, only: [:show, :update]
 
       def index
-        # if !params[:user_id].nil?
-
           places = Place.where(:user_id=>@decoded[:user_id])
-          puts "=================#{places.count}"
-          render json: {results: places.as_json(:include=>[:shareWiths],except:[:created_at,:updated_at,:user_id]), error: nil}
-        # else
-        #   render json: {result: nil, error: "id must be exists!"}
-        # end
+          placeData = places.as_json(:include=>[:shareWiths=>{:include=>[:user]}],except:[:created_at,:updated_at,:user_id])
+          puts placeData.first
+          render json: {results: placeData, error: nil}
       end
-
-      # def show
-      #   render json: {result: @place}
-      # end
 
       def create
         place = Place.new(place_params)
-        # puts "DECODER value #{@decoder[]}"
         place.user_id = @decoded[:user_id]
         if place.save
           share = ShareWith.new
           share.user_id = params["shareWiths"][0]["user_id"]
-          puts ">>>>>>>>>>#{params["shareWiths"][0]["user_id"]}"
           share.place_id = place.id
           if share.save
             response.status = 201
@@ -36,14 +26,32 @@ module Api
             render json:{result: nil, error: share.errors.full_messages}
           end
         else
-          puts "ta damdo merda aqui"
-          puts "Erro>>>>>#{place.errors.full_messages}"
           response.status = 409
           render json:{result: nil, error: place.errors.full_messages}
         end
       end
 
       def update
+        if place = Place.update(params[:id],place_params)
+          shareParams = params["shareWiths"][0]
+          if shareParams['id'] != nil
+            shareWith = ShareWith.find_by_id(shareParams["id"])
+            shareWith.place_id = shareParams['place_id']
+          else
+            shareWith = ShareWith.new
+            shareWith.place_id = place.id
+          end
+          shareWith.user_id = shareParams['user_id']
+          if shareWith.save
+            response.status = 200
+            render json:{result: place, error: nil}
+          else
+            render json:{result: nil, error: shareWith.errors.full_messages}
+          end
+        else
+          response.status = 409
+          render json:{result: nil, error: place.errors.full_messages}
+        end
       end
 
 

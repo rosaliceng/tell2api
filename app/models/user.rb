@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   has_many :places
   # belongs_to :shareWith, optional: true
+  has_many :shareWiths
 
   validates :email, presence: true, uniqueness: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
