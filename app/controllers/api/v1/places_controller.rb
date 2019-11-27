@@ -15,15 +15,19 @@ module Api
         place = Place.new(place_params)
         place.user_id = @decoded[:user_id]
         if place.save
-          share = ShareWith.new
-          share.user_id = params["shareWiths"][0]["user_id"]
-          share.place_id = place.id
-          if share.save
-            response.status = 201
-            render json:{result: place, error: nil}
+          unless params["shareWiths"][0].empty?
+            share = ShareWith.new
+            share.user_id = params["shareWiths"][0]["user_id"]
+            share.place_id = place.id
+            if share.save
+              response.status = 201
+              render json:{result: place, error: nil}
+            else
+              response.status = 409
+              render json:{result: nil, error: share.errors.full_messages}
+            end
           else
-            response.status = 409
-            render json:{result: nil, error: share.errors.full_messages}
+            render json:{result: place, error:nil}
           end
         else
           response.status = 409
@@ -52,6 +56,19 @@ module Api
           response.status = 409
           render json:{result: nil, error: place.errors.full_messages}
         end
+      end
+
+      def destroy
+        if place = Place.find_by_id(params[:id]).destroy
+          if share = ShareWith.where("place_id = ?",params[:id]).destroy_all
+            render json: {result: nil, error: nil}
+          else
+            render json: {result: nil, error: share.errors.full_messages}
+          end
+        else
+          render json: {result: nil, error: place.errors.full_messages}
+        end
+
       end
 
 

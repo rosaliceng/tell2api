@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       # asldaskdj
       resources :users
-      resources :places, only: [:create,:update]
+      resources :places#, only: [:create,:update,:destroy]
       resources :share_withs
       get '/places', to: 'places#index'
       get '/current_user', to: 'users#current'
