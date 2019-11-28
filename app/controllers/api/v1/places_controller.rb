@@ -7,7 +7,7 @@ module Api
       def index
           places = Place.where(:user_id=>@decoded[:user_id])
           placeData = places.as_json(:include=>[:shareWiths=>{:include=>[:user]}],except:[:created_at,:updated_at,:user_id])
-          puts placeData.first
+          puts placeData
           render json: {results: placeData, error: nil}
       end
 
@@ -27,6 +27,7 @@ module Api
               render json:{result: nil, error: share.errors.full_messages}
             end
           else
+            response.status = 201
             render json:{result: place, error:nil}
           end
         else

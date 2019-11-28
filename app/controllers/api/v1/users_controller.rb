@@ -45,11 +45,17 @@ module Api
 
       # PATCH/PUT /users/1
       def update
+        if user_params[:password].empty? || user_params[:password].nil?
+          puts ">>>>>>>>>>>Heyyyyy senha vazia viu?"
+        else
+          puts ">>>>>>>>>>>Senha ta vindo #{user_params[:password]}"
+        end
         if @user.update(user_params)
           response.status = 200
-          render json: @user
+          render json: {result: @user, error: nil}
         else
-          render json: @user.errors, status: :unprocessable_entity
+          response.status = 409
+          render json: {result: nil, error: @user.errors.full_messages}
         end
       end
 
