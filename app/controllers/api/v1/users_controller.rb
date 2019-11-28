@@ -18,7 +18,7 @@ module Api
       end
 
       def current
-        render json: @current_user
+        render json:{ result: @current_user, error: nil}
       end
 
       # GET /users/1
