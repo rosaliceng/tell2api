@@ -37,7 +37,13 @@ module Api
       end
 
       def show
-        render json:{result: @place, error: nil}
+        begin
+          place = Place.find_by_id(params[:id])
+          render json:{result: place.as_json(:include=>[:shareWiths=>{:include=>[:user]}],except:[:created_at,:updated_at,:user_id]), error: nil}
+        rescue
+          render json:{result: nil, error: place.errors.full_messages}
+        end
+
       end
 
       def update
