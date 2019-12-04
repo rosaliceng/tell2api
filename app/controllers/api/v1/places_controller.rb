@@ -36,6 +36,10 @@ module Api
         end
       end
 
+      def show
+        render json:{result: @place, error: nil}
+      end
+
       def update
         if place = Place.update(params[:id],place_params)
           shareParams = params["shareWiths"][0]
@@ -72,10 +76,13 @@ module Api
 
       end
 
-
       private
       def set_places
-        @place = Place.find_by_id(params[:id])
+        begin
+          @place = Place.find_by_id(params[:id])
+        rescue
+          render json:{result: nil, error: @place.errors.full_messages}
+        end
       end
 
       def place_params
